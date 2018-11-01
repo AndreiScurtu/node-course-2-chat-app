@@ -30,23 +30,27 @@ function socketOnDisconnect() {
 };
 
 function socketOnNewMessage(message) {
-    const formatedTime = moment(message.createdAt).format('h:mm a'),
-          li = $('<li></li>');
+    const template = $('#message-template').html(),
+          formatedTime = moment(message.createdAt).format('h:mm a'),
+          html = Mustache.render(template, {
+              text: message.text,
+              from: message.from,
+              createdAt: formatedTime
+          });
 
-    li.text(`${message.from} ${formatedTime}: ${message.text}`);
-    messageList.append(li);
+    messageList.append(html);
 };
 
 function socketOnNewLocationMessage(message) {
-    const li = $('<li></li>'),
-          a = $('<a target="_blank">My current location</a>'),
-          formatedTime = moment(message.createdAt).format('h:mm a');
+    const template = $('#location-message-template').html(),
+          formatedTime = moment(message.createdAt).format('h:mm a'),
+          html = Mustache.render(template, { 
+              url: message.url,
+              from: message.from,
+              createdAt: formatedTime
+          });
     
-    li.text(`${message.from} ${formatedTime}: `);
-    a.attr('href', message.url);
-
-    li.append(a);
-    messageList.append(li);
+    messageList.append(html);
 };
 
 function messageFormOnSubmit(event) {
