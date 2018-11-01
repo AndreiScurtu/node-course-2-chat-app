@@ -33,24 +33,26 @@ function socketOnNewMessage(message) {
     const template = $('#message-template').html(),
           formatedTime = moment(message.createdAt).format('h:mm a'),
           html = Mustache.render(template, {
-              text: message.text,
-              from: message.from,
-              createdAt: formatedTime
-          });
+            text: message.text,
+            from: message.from,
+            createdAt: formatedTime
+        });
 
     messageList.append(html);
+    scrollToBottom();
 };
 
 function socketOnNewLocationMessage(message) {
     const template = $('#location-message-template').html(),
           formatedTime = moment(message.createdAt).format('h:mm a'),
-          html = Mustache.render(template, { 
-              url: message.url,
-              from: message.from,
-              createdAt: formatedTime
-          });
-    
+          html = Mustache.render(template, {
+            url: message.url,
+            from: message.from,
+            createdAt: formatedTime
+        });
+
     messageList.append(html);
+    scrollToBottom();
 };
 
 function messageFormOnSubmit(event) {
@@ -87,6 +89,20 @@ function locationButtonOnClick() {
         locationButton
             .removeAttr('disabled')
             .text('Send location');
-        alert('Unable to fetch location.');        
+        alert('Unable to fetch location.');
     });
+};
+
+function scrollToBottom() {
+    const newMessage = messageList.children('li:last-child'),
+
+          clientHeight = messageList.prop('clientHeight'),
+          scrollTop = messageList.prop('scrollTop'),
+          scrollHeight = messageList.prop('scrollHeight'),
+          newMessageHeight = newMessage.innerHeight()
+          lastMessageHeight = newMessage.prev().innerHeight();
+
+    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+        messageList.scrollTop(scrollHeight);
+    }
 };
