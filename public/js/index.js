@@ -1,34 +1,55 @@
-let socket = io();
+const socket = io(),
+      messageForm = $('#message-form'),
+      messageList = $('#messages'),
+      locationButton = $('#send-location');
 
-socket.on('connect', () => {
+
+
+// Socket listeners
+
+socket.on('connect', socketOnConnect);
+socket.on('disconnect', socketOnDisconnect);
+socket.on('newMessage', socketOnNewMessage);
+socket.on('newLocationMessage', socketOnNewLocationMessage);
+
+
+// Event listeners
+
+messageForm.on('submit', messageFormOnSubmit);
+locationButton.on('click', locationButtonOnClick);
+
+
+// Methods
+
+function socketOnConnect() {
     console.log('Connected to server');
-});
+};
 
-socket.on('disconnect', () => {
+function socketOnDisconnect() {
     console.log('Disconnected from server');
-});
+};
 
-socket.on('newMessage', message => {
-    console.log(message);
+function socketOnNewMessage(message) {
+    const formatedTime = moment(message.createdAt).format('h:mm a'),
+          li = $('<li></li>');
 
-    const li = $('<li></li>');
-    li.text(`${message.from}: ${message.text}`);
+    li.text(`${message.from} ${formatedTime}: ${message.text}`);
+    messageList.append(li);
+};
 
-    $('#messages').append(li);
-});
-
-socket.on('newLocationMessage', message => {
+function socketOnNewLocationMessage(message) {
     const li = $('<li></li>'),
-          a = $('<a target="_blank">My current location</a>');
+          a = $('<a target="_blank">My current location</a>'),
+          formatedTime = moment(message.createdAt).format('h:mm a');
     
-    li.text(`${message.from}: `);
+    li.text(`${message.from} ${formatedTime}: `);
     a.attr('href', message.url);
 
     li.append(a);
-    $('#messages').append(li);
-});
+    messageList.append(li);
+};
 
-$('#message-form').on('submit', event => {
+function messageFormOnSubmit(event) {
     event.preventDefault();
 
     const messageTextbox = $('[name=message]');
@@ -39,12 +60,9 @@ $('#message-form').on('submit', event => {
     }, () => {
         messageTextbox.val('');
     });
+};
 
-});
-
-const locationButton = $('#send-location');
-
-locationButton.on('click', () => {
+function locationButtonOnClick() {
     if (!navigator.geolocation) {
         return alert('Geolocation not supported by your browser.');
     }
@@ -67,4 +85,4 @@ locationButton.on('click', () => {
             .text('Send location');
         alert('Unable to fetch location.');        
     });
-});
+};
