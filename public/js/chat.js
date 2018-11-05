@@ -9,6 +9,7 @@ const socket = io(),
 
 socket.on('connect', socketOnConnect);
 socket.on('disconnect', socketOnDisconnect);
+socket.on('updateUserList', socketOnUpdateUserList);
 socket.on('newMessage', socketOnNewMessage);
 socket.on('newLocationMessage', socketOnNewLocationMessage);
 
@@ -22,11 +23,28 @@ locationButton.on('click', locationButtonOnClick);
 // Methods
 
 function socketOnConnect() {
-    console.log('Connected to server');
+    const params = $.deparam(window.location.search);
+    
+    socket.emit('join', params, err => {
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('No error.');
+        };
+    });
 };
 
 function socketOnDisconnect() {
     console.log('Disconnected from server');
+};
+
+function socketOnUpdateUserList(users) {
+    const ol = $('<ol></ol>');
+
+    users.forEach(user => ol.append($('<li></li>').text(user)));
+
+    $('#users').html(ol);
 };
 
 function socketOnNewMessage(message) {
